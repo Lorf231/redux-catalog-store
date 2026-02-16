@@ -9,4 +9,5 @@ export interface CartItem {
 export interface CartState {
   items: CartItem[];
   totalAmount: number;
+  isSynced: boolean; 
 }

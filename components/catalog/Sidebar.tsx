@@ -7,8 +7,28 @@ import { Category } from '@/types/product';
 
 export default function Sidebar() {
   const dispatch = useAppDispatch();
+  
   const { searchTerm, categoryId, minPrice, maxPrice } = useAppSelector((state) => state.filter);
   const { data: categories } = useGetCategoriesQuery();
+
+  const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value);
+    if (val >= 0) {
+      dispatch(setPriceRange({ min: val, max: maxPrice }));
+    }
+  };
+
+  const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value);
+    if (val >= 0) {
+      dispatch(setPriceRange({ min: minPrice, max: val }));
+    }
+  };
+
+  const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = Number(e.target.value);
+    dispatch(setPriceRange({ min: minPrice, max: val }));
+  };
 
   return (
     <aside className="w-full lg:w-1/4 flex-shrink-0">
@@ -24,7 +44,6 @@ export default function Sidebar() {
           </button>
         </div>
 
-        {/* Пошук */}
         <div className="mb-6">
           <label className="text-sm font-semibold text-gray-700 mb-2 block">Пошук</label>
           <input 
@@ -36,7 +55,6 @@ export default function Sidebar() {
           />
         </div>
 
-        {/* Категорії */}
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-gray-700 mb-2">Категорії</h3>
           <div className="flex flex-col gap-1 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
@@ -49,7 +67,7 @@ export default function Sidebar() {
                   type="checkbox" 
                   className="checkbox checkbox-primary checkbox-xs rounded-sm"
                   checked={categoryId === cat.id}
-                  onChange={() => dispatch(setCategory(cat.id))}
+                  onChange={() => dispatch(setCategory(categoryId === cat.id ? null : cat.id))}
                 />
                 <span className="text-sm truncate">{cat.name}</span>
               </label>
@@ -57,32 +75,41 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Ціна */}
         <div>
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Ціна ($)</h3>
+          
           <div className="flex items-center gap-2 mb-4">
             <input 
               type="number" 
               className="input input-bordered input-xs w-full text-center"
               value={minPrice}
-              onChange={(e) => dispatch(setPriceRange({ min: Number(e.target.value), max: maxPrice }))}
+              onChange={handleMinPriceChange}
+              placeholder="0"
             />
             <span className="text-gray-400">-</span>
             <input 
               type="number" 
               className="input input-bordered input-xs w-full text-center"
               value={maxPrice}
-              onChange={(e) => dispatch(setPriceRange({ min: minPrice, max: Number(e.target.value) }))}
+              onChange={handleMaxPriceChange}
+              placeholder="1000"
             />
           </div>
+
           <input 
             type="range" 
             min="0" 
             max="1000" 
+            step="10"  
             value={maxPrice} 
             className="range range-primary range-xs" 
-            onChange={(e) => dispatch(setPriceRange({ min: minPrice, max: Number(e.target.value) }))}
+            onChange={handleRangeChange}
           />
+          <div className="w-full flex justify-between text-xs px-2 mt-2 text-gray-400">
+            <span>0</span>
+            <span>500</span>
+            <span>1000</span>
+          </div>
         </div>
 
       </div>

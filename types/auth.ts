@@ -1,11 +1,12 @@
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  token: string;
+export interface UserProfile {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  createdAt?: string;
 }
 
 export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
+  user: UserProfile | null;
+  isLoading: boolean;
+  error: string | null;
 }

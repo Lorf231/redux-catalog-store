@@ -10,7 +10,7 @@ interface FilterState {
 const initialState: FilterState = {
   searchTerm: '',
   categoryId: null,
-  minPrice: 0,
+  minPrice: 1, 
   maxPrice: 1000,
 };
 
@@ -22,7 +22,7 @@ const filterSlice = createSlice({
       state.searchTerm = action.payload;
     },
     setCategory: (state, action: PayloadAction<number | null>) => {
-      state.categoryId = state.categoryId === action.payload ? null : action.payload;
+      state.categoryId = action.payload;
     },
     setPriceRange: (state, action: PayloadAction<{ min: number; max: number }>) => {
       state.minPrice = action.payload.min;
@@ -31,7 +31,7 @@ const filterSlice = createSlice({
     resetFilters: (state) => {
       state.searchTerm = '';
       state.categoryId = null;
-      state.minPrice = 0;
+      state.minPrice = 1;
       state.maxPrice = 1000;
     },
   },

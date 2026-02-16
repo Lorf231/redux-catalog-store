@@ -1,97 +1,93 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-import { useAppDispatch } from '@/hooks/reduxHooks';
-import { login } from '@/lib/store/features/authSlice';
+
+import { useAppDispatch, useAppSelector } from '@/hooks/reduxHooks';
+import { loginUser } from '@/lib/store/features/authSlice'; 
+import Loader from '@/components/ui/Loader'; 
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const dispatch = useAppDispatch();
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  
+  const { isLoading } = useAppSelector((state) => state.auth);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (email && password.length >= 6) {
-      
-      const mockUser = {
-        id: '1',
-        email: email,
-        name: email.split('@')[0], 
-        token: 'fake-jwt-token-123'
-      };
-
-      dispatch(login(mockUser));
-      toast.success(`Вітаємо, ${mockUser.name}!`);
-      router.push('/'); 
-    } else {
-      toast.error('Помилка! Пароль має бути мінімум 6 символів.');
-    }
     
-    setIsLoading(false);
+    try {
+      await dispatch(loginUser({ 
+        email: formData.email, 
+        password: formData.password 
+      })).unwrap();
+
+      toast.success('Вітаємо! Ви успішно увійшли.');
+      router.push('/');
+      
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error || 'Помилка входу. Перевірте дані.');
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg border border-gray-100">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            Вхід в акаунт
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Або <Link href="/" className="font-medium text-blue-600 hover:text-blue-500">поверніться до магазину</Link>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
+      <div className="card w-full max-w-md bg-white shadow-xl border border-gray-100">
+        <div className="card-body">
+          <h2 className="card-title justify-center text-2xl font-bold text-gray-800 mb-2">Вхід</h2>
+          <p className="text-center text-gray-500 mb-6 text-sm">Введіть свої дані для доступу</p>
+          
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div className="form-control">
+              <label className="label"><span className="label-text font-medium">Email</span></label>
+              <input 
+                type="email" 
+                className="input input-bordered bg-gray-50 focus:bg-white" 
+                placeholder="name@example.com" 
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label"><span className="label-text font-medium">Пароль</span></label>
+              <input 
+                type="password" 
+                className="input input-bordered bg-gray-50 focus:bg-white" 
+                placeholder="••••••••" 
+                required
+                value={formData.password}
+                onChange={(e) => setFormData({...formData, password: e.target.value})}
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              className="btn btn-primary mt-4 w-full" 
+              disabled={isLoading}
+            >
+              {isLoading ? <Loader size="sm" variant="spinner" className="text-white" /> : 'Увійти'}
+            </button>
+          </form>
+
+          <div className="divider text-xs text-gray-400 mt-6">АБО</div>
+          
+          <p className="text-center text-sm text-gray-600">
+            Немає акаунту?{' '}
+            <Link href="/register" className="text-primary font-bold hover:underline">
+              Зареєструватися
+            </Link>
           </p>
         </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div className="mb-4">
-              <label className="text-sm font-medium text-gray-700">Email адреса</label>
-              <input
-                type="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="admin@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">Пароль</label>
-              <input
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="******"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-70"
-            >
-              {isLoading ? <span className="loading loading-spinner loading-xs"></span> : 'Увійти'}
-            </button>
-          </div>
-          
-          <div className="text-xs text-center text-gray-400">
-            (Введіть будь-який email та пароль {'>'} 6 символів)
-          </div>
-        </form>
       </div>
     </div>
   );

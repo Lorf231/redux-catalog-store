@@ -8,7 +8,6 @@ import { useAppDispatch } from '@/hooks/reduxHooks';
 import { addToCart } from '@/lib/store/features/cartSlice';
 import { useAuthGuard } from '@/hooks/useAuth';
 
-// Імпорти нових компонентів
 import ProductImage from '@/components/catalog/Item/ItemImage';
 import ProductInfo from '@/components/catalog/Item/ItemInfo';
 import ProductActions from '@/components/catalog/Item/ItemActions';
@@ -17,21 +16,17 @@ import Loader from '@/components/ui/Loader';
 export default function ProductDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const dispatch = useAppDispatch();
-  const { requireAuth } = useAuthGuard(); // Хук авторизації
+  const { requireAuth } = useAuthGuard(); 
 
   const { data: product, isLoading, isError } = useGetProductByIdQuery(id);
 
-  // Функція додавання в кошик (приймає кількість від дочірнього компонента)
   const handleAddToCart = (quantity: number) => {
     if (!product) return;
 
-    // 1. Перевірка авторизації
     if (!requireAuth('🔒 Увійдіть, щоб купити цей товар')) return;
 
-    // 2. Чистимо картинку для кошика
     const cleanImage = product.images[0]?.replace(/["[\]]/g, '') || '';
 
-    // 3. Додаємо в Redux
     dispatch(addToCart({
       id: product.id,
       title: product.title,
@@ -40,7 +35,6 @@ export default function ProductDetailsPage() {
       quantity: quantity
     }));
 
-    // 4. Повідомлення
     toast.success(`🛒 Додано ${quantity} шт. "${product.title}"!`, {
       position: "bottom-right",
       theme: "colored"
@@ -64,7 +58,6 @@ export default function ProductDetailsPage() {
     <div className="container mx-auto p-4 py-10 min-h-screen">
       <div className="card lg:card-side bg-white shadow-xl border border-gray-100 overflow-hidden">
         
-        {/* Компонент Картинки */}
         <ProductImage 
           image={product.images[0]} 
           title={product.title} 
@@ -73,7 +66,6 @@ export default function ProductDetailsPage() {
 
         <div className="card-body lg:w-1/2 p-8 flex flex-col justify-between">
           <div>
-            {/* Компонент Інформації */}
             <ProductInfo 
               title={product.title} 
               price={product.price} 
@@ -81,7 +73,6 @@ export default function ProductDetailsPage() {
             />
           </div>
 
-          {/* Компонент Дій (Кнопки) */}
           <ProductActions onAddToCart={handleAddToCart} />
         </div>
 
